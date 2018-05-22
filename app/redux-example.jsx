@@ -2,63 +2,106 @@ const redux = require('redux')
 
 console.log('Starting redux example')
 
-let stateDefault = {
-  name: 'Anonymous',
-  hobbies: [],
-  movies: [],
-  hobbyId: 0,
-  movieId: 0
-}
-// let nextHobbyId = 1
-// let nextMovieId = 1
-
-let reducer = (state = stateDefault, action) => {
-
+/*
+ *  Name reducer and action generators.
+ */
+let nameReducer = (state = 'Anonymous', action) => {
   switch (action.type) {
     case 'CHANGE_NAME':
-      return {
-        ...state,
-        name: action.name
-      }
+    return action.name
+    default:
+    return state
+  }
+}
+
+let changeName = (name) => {
+  return {
+    type: 'CHANGE_NAME',
+    name
+  }
+}
+
+/*
+ *  Hobbies reducer and action generators.
+ */
+let nextHobbyId = 1
+let hobbiesReducer = (state = [], action) => {
+  switch (action.type) {
     case 'ADD_HOBBY':
-      return {
-        ...state,
-        hobbyId: ++state.hobbyId,
-        hobbies: [
-          ...state.hobbies,
-          {
-            id: state.hobbyId,
-            hobby: action.hobby
-          }
-        ],
+    return [
+      ...state,
+      {
+        id: nextHobbyId++,
+        hobby: action.hobby
       }
+    ]
     case 'REMOVE_HOBBY':
-      return {
-        ...state,
-        hobbies: state.hobbies.filter(hobby => hobby.id !== action.id)
-      }
+    return state.filter(hobby => hobby.id !== action.id)
+    default:
+    return state
+  }
+}
+
+let addHobby = (hobby) => {
+  return {
+    type: 'ADD_HOBBY',
+    hobby
+  }
+}
+
+let removeHobby = (id) => {
+  return {
+    type: 'REMOVE_HOBBY',
+    id
+  }
+}
+
+/*
+ *  Movies reducer and action generators.
+ */
+let nextMovieId = 1
+let moviesReducer = (state = [], action) => {
+  switch (action.type) {
     case 'ADD_MOVIE':
-      return {
+      return [
         ...state,
-        movieId: ++state.movieId,
-        movies: [
-          ...state.movies,
-          {
-            id: state.movieId,
-            movie: action.movie,
-            genre: action.genre
-          }
-        ],
-      }
+        {
+          id: nextMovieId++,
+          movie: action.movie,
+          genre: action.genre
+        }
+      ]
     case 'REMOVE_MOVIE':
-      return {
-        ...state,
-        movies: state.movies.filter(movies => movies.id !== action.id)
-      }
+      return state.filter(movie => movie.id !== action.id)
     default:
       return state
   }
 }
+
+let addMovie = (movie, genre) => {
+  return {
+    type: 'ADD_MOVIE',
+    movie,
+    genre
+  }
+}
+
+let removeMovie = (id) => {
+  return {
+    type: 'REMOVE_MOVIE',
+    id
+  }
+}
+
+/*
+ *  The reducer combinator. 
+ */
+let reducer = redux.combineReducers({
+  name: nameReducer,
+  hobbies: hobbiesReducer,
+  movies: moviesReducer
+})
+
 const store = redux.createStore(
   reducer,
   redux.compose(
@@ -75,44 +118,17 @@ let unsubscribe = store.subscribe(() => {
 })
 // unsubscribe()
 
-store.dispatch({
-  type: 'CHANGE_NAME',
-  name: 'Josh'
-})
+store.dispatch(changeName('Josh'))
 
-store.dispatch({
-  type: 'ADD_HOBBY',
-  hobby: 'eating'
-}
-)
-store.dispatch({
-  type: 'ADD_HOBBY',
-  hobby: 'drinking'
-})
+store.dispatch(addHobby('eating'))
+store.dispatch(addHobby('drinking'))
 
-store.dispatch({
-  type: 'REMOVE_HOBBY',
-  id: 2
-})
+store.dispatch(removeHobby(2))
 
-store.dispatch({
-  type: 'ADD_MOVIE',
-  movie: 'Inception',
-  genre: 'Thriller'
-})
+store.dispatch(addMovie('Inception', 'Thriller'))
 
-store.dispatch({
-  type: 'ADD_MOVIE',
-  movie: 'Aliens',
-  genre: 'Science Fiction/Horror'
-})
+store.dispatch(addMovie('Aliens', 'Science Fiction/Horror'))
 
-store.dispatch({
-  type: 'REMOVE_MOVIE',
-  id: 1
-})
+store.dispatch(removeMovie(1))
 
-store.dispatch({
-  type: 'CHANGE_NAME',
-  name: 'Matt'
-})
+store.dispatch(changeName('Matt'))
