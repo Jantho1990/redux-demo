@@ -32,6 +32,11 @@ let reducer = (state = stateDefault, action) => {
           }
         ],
       }
+    case 'REMOVE_HOBBY':
+      return {
+        ...state,
+        hobbies: state.hobbies.filter(hobby => hobby.id !== action.id)
+      }
     case 'ADD_MOVIE':
       return {
         ...state,
@@ -44,6 +49,11 @@ let reducer = (state = stateDefault, action) => {
             genre: action.genre
           }
         ],
+      }
+    case 'REMOVE_MOVIE':
+      return {
+        ...state,
+        movies: state.movies.filter(movies => movies.id !== action.id)
       }
     default:
       return state
@@ -73,6 +83,16 @@ store.dispatch({
 store.dispatch({
   type: 'ADD_HOBBY',
   hobby: 'eating'
+}
+)
+store.dispatch({
+  type: 'ADD_HOBBY',
+  hobby: 'drinking'
+})
+
+store.dispatch({
+  type: 'REMOVE_HOBBY',
+  id: 2
 })
 
 store.dispatch({
@@ -85,6 +105,11 @@ store.dispatch({
   type: 'ADD_MOVIE',
   movie: 'Aliens',
   genre: 'Science Fiction/Horror'
+})
+
+store.dispatch({
+  type: 'REMOVE_MOVIE',
+  id: 1
 })
 
 store.dispatch({
