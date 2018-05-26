@@ -1,4 +1,5 @@
-const redux = require('redux')
+const redux = require('redux'),
+      axios = require('axios')
 
 console.log('Starting redux example')
 
@@ -94,12 +95,57 @@ let removeMovie = (id) => {
 }
 
 /*
+ *  Map reducer and action generators. 
+ */
+let mapReducer = (state = {isFetching: false, url: undefined}, action) => {
+  switch (action.type) {
+    case 'START_LOCATION_FETCH':
+      return {
+        isFetching: true,
+        url: undefined
+      }
+    case 'COMPLETE_LOCATION_FETCH':
+      return {
+        isFetching: false,
+        url: action.url
+      }
+    default:
+      return state
+  }
+}
+
+let startLocationFetch = () => {
+  return {
+    type: 'START_LOCATION_FETCH'
+  }
+}
+
+let completeLocationFetch = (url) => {
+  return {
+    type: 'COMPLETE_LOCATION_FETCH',
+    url
+  }
+}
+
+let fetchLocation = () => {
+  store.dispatch(startLocationFetch())
+
+  axios.get('http://ipinfo.io').then(function (res) {
+    let loc = res.data.loc
+    let baseUrl = 'https://maps.google.com?'
+
+    store.dispatch(completeLocationFetch(baseUrl + loc))
+  })
+}
+
+/*
  *  The reducer combinator. 
  */
 let reducer = redux.combineReducers({
   name: nameReducer,
   hobbies: hobbiesReducer,
-  movies: moviesReducer
+  movies: moviesReducer,
+  map: mapReducer
 })
 
 const store = redux.createStore(
@@ -114,9 +160,17 @@ let unsubscribe = store.subscribe(() => {
   let state = store.getState()
 
   console.log('new state', state)
-  document.querySelector('#app').innerHTML = state.name
+  // document.querySelector('#app').innerHTML = state.name
+
+  if (state.map.isFetching) {
+    document.querySelector('#app').innerHTML = 'loading...'
+  } else if (state.map.url !== undefined) {
+    document.querySelector('#app').innerHTML = `<a target="_blank" href="${state.map.url}">View your location</a>`
+  }
 })
 // unsubscribe()
+
+fetchLocation()
 
 store.dispatch(changeName('Josh'))
 
